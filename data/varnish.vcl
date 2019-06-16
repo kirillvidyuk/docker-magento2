@@ -11,8 +11,11 @@ backend default {
 
 acl purge {
     "localhost";
+    "127.0.0.1";
+    "10.0.0.0/8";
+    "172.16.0.0/12";
+    "192.168.0.0/16";
     "web";
-    "varnish";
 }
 
 sub vcl_recv {
@@ -88,6 +91,15 @@ sub vcl_hash {
     if (req.http.cookie ~ "X-Magento-Vary=") {
         hash_data(regsub(req.http.cookie, "^.*?X-Magento-Vary=([^;]+);*.*$", "\1"));
     }
+
+    if (req.http.cookie ~ "Social-Login-Vary=") {
+        hash_data(regsub(req.http.cookie, "^.*?Social-Login-Vary=([^;]+);*.*$", "\1"));
+    }
+   # if (req.http.cookie ~ "Social-Login-Vary=") {
+    #    set req.http.X-TMP = regsub(req.http.cookie, ".*Social-Login-Vary=([^;]+);.*", "\1");
+   #     hash_data(req.http.X-TMP);
+  #      remove req.http.X-TMP;
+  #  }
 
     # For multi site configurations to not cache each other's content
     if (req.http.host) {
